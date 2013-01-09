@@ -1,11 +1,17 @@
+/**
+ * Module dependencies
+ */
+
 var throttle = require('throttle')
+var PREFIX = 'KeyValue'
 
 module.exports = KeyValue
 
 /**
- * KeyValue constructor.
+ * KeyValue constructor. Give it a unique `name`.
  *
  * @param {String} name
+ * @api public
  */
 
 function KeyValue(name) {
@@ -16,10 +22,12 @@ function KeyValue(name) {
 }
 
 /**
- * Use storage.local instead of storage.sync.
+ * Use `chrome.storage.local` instead of `chrome.storage.sync`.
  *
- * Storage.local doesn't sync data to
+ * `chrome.storage.local` doesn't sync data to
  * this account on other machines.
+ *
+ * @api public
  */
 
 KeyValue.prototype.useLocal = function() {
@@ -28,9 +36,10 @@ KeyValue.prototype.useLocal = function() {
 }
 
 /**
- * Use local storage instead of local. storage.sync is the default
+ * Use `chrome.storage.sync` instead of `chrome.storage.local`. `chrome.storage.sync` is the default
  * and this method only exists for completeness.
  *
+ * @api public
  */
 
 KeyValue.prototype.useSync = function() {
@@ -54,7 +63,7 @@ KeyValue.prototype.set = function(key, value, fn) {
   }
 
   self._cache[key] = value
-  this._get(function(err, mappings) {
+  this._load(function(err, mappings) {
     if (err) return fn(err)
     mappings = mappings || {}
     mappings[key] = value
@@ -71,7 +80,7 @@ KeyValue.prototype.set = function(key, value, fn) {
  *
  * @param {String} key
  * @param {Function} fn
- * @api private
+ * @api public
  */
 
 KeyValue.prototype.get = function(key, fn) {
@@ -79,7 +88,7 @@ KeyValue.prototype.get = function(key, fn) {
   if (typeof self._cache[key] !== undefined) {
     return fn(null, self._cache[key])
   }
-  self._get(function(err, values) {
+  self._load(function(err, values) {
     if (err) return fn(err)
     values = values || {}
     return fn(null, values[key])
@@ -87,26 +96,57 @@ KeyValue.prototype.get = function(key, fn) {
   return this
 }
 
+/**
+ * Delete value associated with `key`
+ *
+ * @param {String}
+ * @param {Function} fn
+ * @api public
+ */
+
 KeyValue.prototype.del = function(key, fn) {
   return this._del(key, fn)
 }
 
 
+/**
+ * Remove all values from this store.
+ *
+ * @param {Function} fn
+ * @api public
+ */
+
 KeyValue.prototype.clear = function(fn) {
   return this._clear(fn)
 }
+
+/**
+ * Interface to `chrome.storage`, updates `chrome.storage` with removed key.
+ *
+ * @param key {String}
+ * @param {Function} fn
+ * @api private
+ */
 
 KeyValue.prototype._del = function(key, fn) {
   var self = this
   delete self._cache[key]
   fn(null)
-  this._get(function(err, mappings) {
+  this._load(function(err, mappings) {
     if (err) return fn(err)
     delete mappings[key]
     self._set(mappings, function(err) {
     })
   })
 }
+
+/**
+ * Interface to `chrome.storage`, clears all data
+ * for this KeyValue instance
+ *
+ * @param {Function} fn
+ * @api private
+ */
 
 KeyValue.prototype._clear = function(fn) {
   return chrome.storage[this.type].remove(this.getGlobalKey(), function(result) {
@@ -115,13 +155,29 @@ KeyValue.prototype._clear = function(fn) {
   })
 }
 
-KeyValue.prototype._get = function(fn) {
+/**
+ * Interface to `chrome.storage`, load hash for this KeyValue instance.
+ *
+ * @param {Function} fn
+ * @api private
+ */
+
+KeyValue.prototype._load = function(fn) {
   var self = this
   return chrome.storage[this.type].get(this.getGlobalKey(), function(result) {
     if (chrome.runtime.lastError) return fn(chrome.runtime.lastError)
     fn(null, result[self.getGlobalKey()])
   })
 }
+
+/**
+ * Wrapper around throttled __set call, to ensure all callbacks fire.
+ *
+ * @param {Object} payload
+ * @param {Function} fn
+ * @api private
+ */
+
 KeyValue.prototype._set = function(payload, fn) {
   this._queue = this._queue || []
   this._queue.push(fn)
@@ -132,7 +188,17 @@ KeyValue.prototype._set = function(payload, fn) {
     })
   })
 }
-KeyValue.prototype.__set = throttle(function(payload, fn) {
+
+/**
+ * Interface to `chrome.storage`, replace KeyValue's data with new `payload`.
+ * throttled to prevent overloading `chrome.storage` `MAX_WRITE_OPERATIONS_PER_HOUR`
+ *
+ * @param {Object} payload
+ * @param {Function} fn
+ * @api private
+ */
+
+KeyValue.prototype.__set = (function(payload, fn) {
   var self = this
   var wrapper = {}
   wrapper[self.getGlobalKey()] = payload
@@ -142,7 +208,13 @@ KeyValue.prototype.__set = throttle(function(payload, fn) {
   })
 }, 100)
 
-var PREFIX = 'KeyValue'
+/**
+ * Get key for current KeyValue instance's `chrome.storage`.
+ *
+ * @return {String}
+ * @api private
+ */
+
 KeyValue.prototype.getGlobalKey = function() {
   if (!this.name) throw new Error('A name must be supplied to the KeyValue instance!')
   return PREFIX + ':' + this.name
