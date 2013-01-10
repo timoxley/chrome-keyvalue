@@ -117,6 +117,7 @@ KeyValue.prototype.del = function(key, fn) {
  */
 
 KeyValue.prototype.clear = function(fn) {
+  this._cache = {}
   return this._clear(fn)
 }
 

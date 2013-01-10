@@ -55,3 +55,21 @@ describe('.del', function() {
     })
   })
 })
+
+describe('.clear', function() {
+  beforeEach(function(done) {
+    kv.set('tim', {
+      name: 'Tim'
+    }, done)
+  })
+  it('removes all items', function(done) {
+    kv.clear(function(err) {
+      assert.ifError(err)
+      kv.get('tim', function(err, value) {
+        assert.ifError(err)
+        assert.strictEqual(value, undefined)
+        done()
+      })
+    })
+  })
+})
