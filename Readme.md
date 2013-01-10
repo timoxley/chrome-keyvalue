@@ -1,5 +1,5 @@
 
-# chrome_storage_keyvalue
+# chrome-keyvalue
 
   Simple Key/Value storage atop chrome.storage. For Chrome extensions.
 
@@ -17,13 +17,13 @@ should prove more convenient.
 
 ## Installation
 
-    $ component install timoxley/chrome_storage_keyvalue
+    $ component install timoxley/chrome-keyvalue
 
 ## Example
 
 ```js
 var assert = require('assert')
-var KeyValue = require('keyvalue')
+var KeyValue = require('chrome-keyvalue')
 
 // create a new instance for 'users'
 var kv = new KeyValue('users')

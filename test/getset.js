@@ -1,4 +1,4 @@
-var KeyValue = require('keyvalue')
+var KeyValue = require('chrome-keyvalue')
 var assert = require('timoxley-assert')
 
 var kv = undefined

@@ -1,6 +1,6 @@
 var ITERATIONS = 300
 
-var KeyValue = require('keyvalue')
+var KeyValue = require('chrome-keyvalue')
 var Batch = require('component-batch')
 
 var kv = undefined
