@@ -2,7 +2,7 @@
   "name": "chrome-keyvalue",
   "repo": "timoxley/chrome-keyvalue",
   "description": "Simple Key/Value storage atop chrome.storage. For Chrome extensions.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "keywords": [],
   "dependencies": {
     "timoxley/assert": "*",
