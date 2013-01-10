@@ -29,6 +29,23 @@ it('can set and get', function(done) {
   })
 })
 
+describe('setting multiple items', function() {
+  it('executes all callbacks', function(done) {
+    var count = 0
+    var next = function() {
+      if (++count) === 2 setTimeout(function() {done()}, 0)
+      if (count > 2) throw new Error('Called too many times')
+    }
+
+    kv.set('tim', {
+      name: 'Tim'
+    }, next)
+    kv.set('bob', {
+      name: 'Bob'
+    }, next)
+  })
+})
+
 describe('.get', function() {
   it('returns undefined if no value for key', function() {
     kv.get('bob', function(err, value) {

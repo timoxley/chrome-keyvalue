@@ -184,7 +184,9 @@ KeyValue.prototype._set = function(payload, fn) {
   this._queue.push(fn)
   var self = this
   this.__set(payload, function(err, result) {
-    self._queue.forEach(function(queuedFn) {
+    var queue = self._queue
+    self._queue = []
+    queue.forEach(function(queuedFn) {
       queuedFn(err, result)
     })
   })
