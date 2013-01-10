@@ -32,8 +32,9 @@ it('can set and get', function(done) {
 describe('setting multiple items', function() {
   it('executes all callbacks', function(done) {
     var count = 0
-    var next = function() {
-      if (++count) === 2 setTimeout(function() {done()}, 0)
+    var next = function(err) {
+      assert.ifError(err)
+      if (++count === 2) setTimeout(function() {done()}, 0)
       if (count > 2) throw new Error('Called too many times')
     }
 
