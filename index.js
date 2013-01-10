@@ -198,7 +198,7 @@ KeyValue.prototype._set = function(payload, fn) {
  * @api private
  */
 
-KeyValue.prototype.__set = (function(payload, fn) {
+KeyValue.prototype.__set = throttle(function(payload, fn) {
   var self = this
   var wrapper = {}
   wrapper[self.getGlobalKey()] = payload
